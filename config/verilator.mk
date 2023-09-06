@@ -40,12 +40,3 @@ WITH_CHISELDB ?= 1
 
 # Enable constantin
 WITH_CONSTANTIN ?= 1
-
-# Default output period control
-# output will be generated when (B<=GTimer<=E) && (L < loglevel)
-# use 'emu -h' to see more details
-# B ?= 0
-# E ?= 0
-
-# default simulation image for `make emu-run`
-IMAGE ?= "../ready-to-run/microbench.bin"
