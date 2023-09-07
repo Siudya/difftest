@@ -19,6 +19,7 @@
 
 #include <unistd.h>
 #include <dlfcn.h>
+#include <cstddef>
 
 #include "common.h"
 
@@ -51,11 +52,55 @@ private:
 
 #define SPIKE_ENV_VARIABLE "SPIKE_HOME"
 #define SPIKE_SO_FILENAME  "difftest/build/riscv64-spike-so"
-class SpikeProxy : public RefProxy {
+
+// To proxy only interacts with one spike .so library even for multicore,
+// use static member function to hook interface functions (with coreid) in Spike.
+//
+// To make this changes transparent for use proxy objects in Difftest,
+// SpikeProxy replaces function pointers in Refproxy to member functions.
+// These member functions invoke corresponding static ones with its own `coreid`.
+//
+// Note: std::bind cannot be used to create partial function with specific `coreid`
+// and assigned to normal function pointers.
+class SpikeProxy {
 public:
-  SpikeProxy(int coreid);
+  SpikeProxy(int coreid): coreid(coreid)
+  {
+    // initialize member functions independent to `coreid`
+    debug_mem_sync = sim_debug_mem_sync;
+    load_flash_bin = sim_load_flash_bin;
+  };
+  static void spike_init();
+  void memcpy(paddr_t nemu_addr, void *dut_buf, size_t n, bool direction);
+  void regcpy(void *dut, bool direction);
+  void csrcpy(void *dut, bool direction);
+  void uarchstatus_cpy(void *dut, bool direction);
+  int store_commit(uint64_t *saddr, uint64_t *sdata, uint8_t *smask);
+  void exec(uint64_t n);
+  vaddr_t guided_exec(void *disambiguate_para);
+  void update_config(void *config);
+  void raise_intr(uint64_t no);
+  void isa_reg_display();
+  void query(void *result_buffer, uint64_t type);
+  void (*debug_mem_sync)(paddr_t addr, void *bytes, size_t size) = nullptr;
+  void (*load_flash_bin)(void *flash_bin, size_t size) = nullptr;
 private:
-};
+  size_t coreid;
+  static void* handle;
+  static void (*sim_memcpy)(size_t coreid, paddr_t nemu_addr, void *dut_buf, size_t n, bool direction);
+  static void (*sim_regcpy)(size_t coreid, void *dut, bool direction);
+  static void (*sim_csrcpy)(size_t coreid, void *dut, bool direction);
+  static void (*sim_uarchstatus_cpy)(size_t coreid, void *dut, bool direction);
+  static int (*sim_store_commit)(size_t coreid, uint64_t *saddr, uint64_t *sdata, uint8_t *smask);
+  static void (*sim_exec)(size_t coreid, uint64_t n);
+  static vaddr_t (*sim_guided_exec)(size_t coreid, void *disambiguate_para);
+  static void (*sim_update_config)(size_t coreid, void *config);
+  static void (*sim_raise_intr)(size_t coreid, uint64_t no);
+  static void (*sim_isa_reg_display)(size_t coreid);
+  static void (*sim_query)(size_t coreid, void *result_buffer, uint64_t type);
+  static void (*sim_debug_mem_sync)(paddr_t addr, void *bytes, size_t size);
+  static void (*sim_load_flash_bin)(void *flash_bin, size_t size);
+ };
 
 struct SyncState {
   uint64_t lrscValid;
