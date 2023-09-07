@@ -367,7 +367,7 @@ void Difftest::do_first_instr_commit() {
         proxy->load_flash_bin(get_flash_path(), get_flash_size());
     }
     #ifdef CONFIG_USE_SPARSEMM
-    printf("copy sparse mem(%lx) to ref\n", get_sparsemm());
+    printf("[sp-mem] copy sparse mem(%lx) to REF\n", get_sparsemm());
     proxy->memcpy(0x80000000, get_sparsemm(), get_img_size(), DIFFTEST_TO_REF);
     #else
     proxy->memcpy(0x80000000, get_img_start(), get_img_size(), DIFFTEST_TO_REF);
