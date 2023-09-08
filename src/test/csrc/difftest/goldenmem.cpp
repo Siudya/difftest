@@ -48,7 +48,7 @@ void* guest_to_host(paddr_t addr) {
 
 void init_goldenmem() {
   #ifdef CONFIG_USE_SPARSEMM
-  printf("init sparse goldenmem");
+  printf("[sp-mem] init sparse goldenmem\n");
   sparse_mem_copy(get_gd_sparsemm(), get_sparsemm());
   ref_misc_put_gmaddr((uint8_t*)get_gd_sparsemm());
   #else
@@ -141,3 +141,4 @@ inline void paddr_write(paddr_t addr, word_t data, int len) {
   if (in_pmem(addr)) pmem_write(addr, data, len);
   else panic("write not in pmem!");
 }
+
