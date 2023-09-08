@@ -31,7 +31,11 @@ extern unsigned long EMU_RAM_SIZE;
 
 // first valid instruction's address, difftest starts from this instruction
 #ifndef FIRST_INST_ADDRESS
-#define FIRST_INST_ADDRESS 0x10000000
+#if DIFF_PROXY == NemuProxy
+#define FIRST_INST_ADDRESS 0x10000000UL
+#else
+#define FIRST_INST_ADDRESS 0x80000000UL
+#endif
 #endif
 
 // sdcard image to be used in simulation
@@ -54,7 +58,7 @@ extern unsigned long EMU_FLASH_SIZE;
 // Difftest interface config
 // -----------------------------------------------------------------------
 #ifndef DIFF_PROXY
-#define DIFF_PROXY NemuProxy
+#define DIFF_PROXY SpikeProxy
 #endif
 
 // max physical register file size

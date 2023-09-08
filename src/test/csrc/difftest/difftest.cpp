@@ -20,6 +20,7 @@
 #include "flash.h"
 #include "spikedasm.h"
 #include "sparseram.h"
+#include "refproxy.h"
 
 static const char *reg_name[DIFFTEST_NR_REG+1] = {
   "$0",  "ra",  "sp",   "gp",   "tp",  "t0",  "t1",   "t2",
@@ -52,6 +53,10 @@ int difftest_init() {
 }
 
 int init_nemuproxy() {
+#if DIFF_PROXY == SpikeProxy
+  // For Spike, only create one .so lib even for multicore
+  SpikeProxy::spike_init();
+#endif
   for (int i = 0; i < NUM_CORES; i++) {
     difftest[i]->update_nemuproxy(i);
   }
