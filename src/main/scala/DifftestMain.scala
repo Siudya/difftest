@@ -18,7 +18,6 @@ package difftest
 
 import chisel3._
 import chisel3.util._
-import chisel3.stage._
 
 // Main class to generat difftest modules when design is not written in chisel.
 class DifftestTop extends Module {
@@ -45,10 +44,4 @@ class DifftestTop extends Module {
     var difftest_runahead_commit_event = Module(new DifftestRunaheadCommitEvent);
     var difftest_runahead_redirect_event = Module(new DifftestRunaheadRedirectEvent);
     var difftest_runahead_memdep_pred = Module(new DifftestRunaheadMemdepPred);
-}
-
-object DifftestMain extends App {
-  (new ChiselStage).execute(args, Seq(
-      ChiselGeneratorAnnotation(() => new DifftestTop))
-  )
 }
